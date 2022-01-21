@@ -159,7 +159,7 @@ void send_data_handler()
             mReportRequestorSet.forEach([&](ReportRequestor* r)
             {
                 sockaddr_in s = r->getIpAddr();
-                size_t bytesSent = sendto(fd, buffer, packetSize, 0, (struct sockaddr*)&s, sizeof(s));
+                /*size_t bytesSent = */sendto(fd, buffer, packetSize, 0, (struct sockaddr*)&s, sizeof(s));
             });
             mReportRequestorSet.removeExpiredEntries();
 		}
@@ -167,25 +167,25 @@ void send_data_handler()
 	}
 }
 
-void motorStatusCallback(const rio_control_node::Motor_Status& msg)
-{
+// void motorStatusCallback(const rio_control_node::Motor_Status& msg)
+// {
 
-}
+// }
 
-void imuDataCallback(const rio_control_node::IMU_Data& msg)
-{
+// void imuDataCallback(const rio_control_node::IMU_Data& msg)
+// {
 
-}
+// }
 
-void motorConfigurationCallback(const rio_control_node::Motor_Configuration& msg)
-{
+// void motorConfigurationCallback(const rio_control_node::Motor_Configuration& msg)
+// {
 
-}
+// }
 
-void motorControlCallback(const rio_control_node::Motor_Control& msg)
-{
+// void motorControlCallback(const rio_control_node::Motor_Control& msg)
+// {
 
-}
+// }
 
 
 int main(int argc, char **argv)
@@ -209,11 +209,11 @@ int main(int argc, char **argv)
 	runThread = true;
 	std::thread heartbeatThread(&run_heartbeat_handler);
     std::thread sendDataThread(&send_data_handler);
-	
-	ros::Subscriber motorStatus = node->subscribe("MotorStatus", 10, motorStatusCallback);
-	ros::Subscriber imuData = node->subscribe("IMUData", 10, imuDataCallback);
-	ros::Subscriber motorConfiguration = node->subscribe("MotorConfiguration", 10, motorConfigurationCallback);
-	ros::Subscriber motorControl = node->subscribe("MotorControl", 10, motorControlCallback);
+
+	// ros::Subscriber motorStatus = node->subscribe("MotorStatus", 10, motorStatusCallback);
+	// ros::Subscriber imuData = node->subscribe("IMUData", 10, imuDataCallback);
+	// ros::Subscriber motorConfiguration = node->subscribe("MotorConfiguration", 10, motorConfigurationCallback);
+	// ros::Subscriber motorControl = node->subscribe("MotorControl", 10, motorControlCallback);
 
 	ros::spin();
 	return 0;
