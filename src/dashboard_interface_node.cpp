@@ -18,6 +18,9 @@
 #include "rio_control_node/Motor_Control.h"
 #include "rio_control_node/Motor_Configuration.h"
 #include "rio_control_node/IMU_Data.h"
+#include "nav_msgs/Odometry.h"
+
+
 
 #define PORT     5809
 #define MAXLINE 1024
@@ -29,15 +32,55 @@ ReportRequestorSet mReportRequestorSet;
 ros::NodeHandle* node;
 bool runThread;
 
+nav_msgs::Odometry odom;
+
 int fd;
 bool socketInitSuccess;
 
 size_t constructPacket(void* buffer, size_t size)
 {
     OSCPP::Client::Packet packet(buffer, size);
+
+    float x = odom.pose.pose.position.x;
+    float y = odom.pose.pose.position.y;
+    float z = odom.pose.pose.position.z;
+
+    float qx = odom.pose.pose.orientation.x;
+    float qy = odom.pose.pose.orientation.y;
+    float qz = odom.pose.pose.orientation.z;
+    float qw = odom.pose.pose.orientation.w;
+
+    float vx = odom.twist.twist.linear.x;
+    float vy = odom.twist.twist.linear.y;
+    float vz = odom.twist.twist.linear.z;
+
+    float vx_angular = odom.twist.twist.angular.x;
+    float vy_angular = odom.twist.twist.angular.y;
+    float vz_angular = odom.twist.twist.angular.z;
+
     packet
-        .openMessage("/LogData", 12)
+        .openMessage("/RobotPose", 13)
+
+        .float32(x)
+        .float32(y)
+        .float32(z)
+
+        .float32(qx)
+        .float32(qy)
+        .float32(qz)
+        .float32(qw)
+
+        .float32(vx)
+        .float32(vy)
+        .float32(vz)
+
+        .float32(vx_angular)
+        .float32(vy_angular)
+        .float32(vz_angular)
+
         .closeMessage();
+
+
     return packet.size();
 }
 
@@ -158,13 +201,19 @@ void send_data_handler()
             size_t packetSize = constructPacket(buffer, BUFSIZE);
             mReportRequestorSet.forEach([&](ReportRequestor* r)
             {
-                sockaddr_in s = r->getIpAddr();
-                /*size_t bytesSent = */sendto(fd, buffer, packetSize, 0, (struct sockaddr*)&s, sizeof(s));
+               sockaddr_in s = r->getIpAddr();
+               sendto(fd, buffer, packetSize, 0, (struct sockaddr*)&s, sizeof(s));
             });
             mReportRequestorSet.removeExpiredEntries();
 		}
 		rate.sleep();
 	}
+}
+
+
+void odomCallback( const nav_msgs::Odometry& msg )
+{
+    odom = msg;
 }
 
 // void motorStatusCallback(const rio_control_node::Motor_Status& msg)
@@ -214,6 +263,8 @@ int main(int argc, char **argv)
 	// ros::Subscriber imuData = node->subscribe("IMUData", 10, imuDataCallback);
 	// ros::Subscriber motorConfiguration = node->subscribe("MotorConfiguration", 10, motorConfigurationCallback);
 	// ros::Subscriber motorControl = node->subscribe("MotorControl", 10, motorControlCallback);
+
+    ros::Subscriber odom = node->subscribe("nav_msgs/Odometry", 10, odomCallback);
 
 	ros::spin();
 	return 0;
