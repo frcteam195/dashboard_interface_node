@@ -264,7 +264,7 @@ int main(int argc, char **argv)
 	// ros::Subscriber motorConfiguration = node->subscribe("MotorConfiguration", 10, motorConfigurationCallback);
 	// ros::Subscriber motorControl = node->subscribe("MotorControl", 10, motorControlCallback);
 
-    ros::Subscriber odom = node->subscribe("nav_msgs/Odometry", 10, odomCallback);
+    ros::Subscriber odom = node->subscribe("/odometry/filtered", 10, odomCallback);
 
 	ros::spin();
 	return 0;
